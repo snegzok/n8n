@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Сам Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # n8n (из соседнего стека)
+  - job_name: 'n8n'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['n8n_n8n-main:5678']
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  # Сервер (CPU, память, диск)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Docker контейнеры
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
