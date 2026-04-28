@@ -34,7 +34,7 @@ services:
     image: grafana/grafana:11.3.0
     environment:
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=https://grafana.expert-only.ru    #← replace
+      - GF_SERVER_ROOT_URL=https://grafana.domain.ru    #← replace
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
     volumes:
       - grafana_data:/var/lib/grafana
@@ -54,7 +54,7 @@ services:
       labels:
         - "traefik.docker.network=traefik-public"
         - "traefik.enable=true"
-        - "traefik.http.routers.grafana.rule=Host(`grafana.expert-only.ru`)" #← replace
+        - "traefik.http.routers.grafana.rule=Host(`grafana.domain.ru`)" #← replace
         - "traefik.http.routers.grafana.entrypoints=websecure"
         - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
         - "traefik.http.services.grafana.loadbalancer.server.port=3000"
