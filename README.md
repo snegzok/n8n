@@ -4,13 +4,47 @@ n8n — это мощный инструмент для автоматизаци
 # Docker Swarm Infrastructure 🐳  Мониторинг и оркестрация
 
 ## 📁 Project Structure
-
+├── scripts/
+│ ├── set-n8n-domain.sh # Смена домена для n8n
+│ ├── set-grafana-domain.sh # Смена домена для Grafana
+│ └── set-all-domains.sh # Смена всех доменов (опционально)
 ├── n8n/
 │ └── n8n-stack.yml # 🧩 n8n + PostgreSQL + Redis + Traefik
-├── prometheus/
+├── grafana-prometheus/
 │ ├── config-prometheus.yml # 📊 Конфигурация Prometheus
-│ └── prometheus-stack.yaml # 🖥️ Стек мониторинга (Prometheus + Grafana + экспортеры)
-└── README.md         
+│ └── prometheus-stack.yaml # 🖥️ Стек мониторинга (Prometheus + Grafana)
+└── README.md
+
+## ⚙️ Domain Configuration
+
+Before deployment, you need to replace the default domains with your own.
+
+### 🔧 Automatic Domain Replacement Scripts
+
+| Script | What it does |
+|--------|--------------|
+| `scripts/set-n8n-domain.sh` | Changes domain in `n8n/n8n-stack.yml` |
+| `scripts/set-grafana-domain.sh` | Changes domain in `grafana-prometheus/prometheus-stack.yaml` |
+
+### 📝 Usage
+
+```bash
+# Make scripts executable
+chmod +x scripts/*.sh
+
+# Show current n8n domain
+./scripts/set-n8n-domain.sh --show
+
+# Set new domain for n8n
+./scripts/set-n8n-domain.sh n8n.mycompany.ru
+
+# Show current Grafana domain
+./scripts/set-grafana-domain.sh --show
+
+# Set new domain for Grafana
+./scripts/set-grafana-domain.sh grafana.mycompany.ru
+
+
 In the manifest file : n8n-stack.yml and prometheus-stack.yaml
 
 ## ⚠️  REPLACE WITH YOUR DOMAIN  ⚠️

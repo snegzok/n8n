@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # 1. PROMETHEUS - СБОРЩИК МЕТРИК
+  # ============================================
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./config-prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+  # ============================================
+  # 2. GRAFANA - ВИЗУАЛИЗАЦИЯ
+  # ============================================
+  grafana:
+    image: grafana/grafana:11.3.0
+    environment:
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://grafana.expert-only.ru    #← replace
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring
+      - traefik-public
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+      labels:
+        - "traefik.docker.network=traefik-public"
+        - "traefik.enable=true"
+        - "traefik.http.routers.grafana.rule=Host(`grafana.expert-only.ru`)" #← replace
+        - "traefik.http.routers.grafana.entrypoints=websecure"
+        - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  # ============================================
+  # 3. ЭКСПОРТЕРЫ
+  # ============================================
+
+  # Метрики сервера (CPU, память, диск, сеть)
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+    networks:
+      - monitoring
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+  # Метрики Docker контейнеров
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.2
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 256M
+
+  # Метрики Redis (очередь n8n)
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.62.0
+    environment:
+      - REDIS_ADDR=redis:6379
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  # Метрики PostgreSQL (БД n8n)
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    secrets:
+         - postgres_password
+    environment:
+         - DATA_SOURCE_URI=postgres:5432/n8n?sslmode=disable
+         - DATA_SOURCE_USER=n8n
+         - DATA_SOURCE_PASS_FILE=/run/secrets/postgres_password
+    networks:
+      - monitoring
+      -  n8n-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+# ============================================
+# СЕТИ
+# ============================================
+networks:
+  monitoring:
+    driver: overlay
+    attachable: true
+  traefik-public:
+    external: true
+  n8n-net:
+    external: true
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  prometheus_data:
+  grafana_data:
+secrets:
+  postgres_password:
+    external: true
