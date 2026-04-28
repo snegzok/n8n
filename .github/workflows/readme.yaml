@@ -1,0 +1,10 @@
+# Шаг 2: Настройка GitHub Secrets
+#В репозитории перейдите в Settings → Secrets and variables → Actions и добавьте:
+#Secret Name Откуда взять
+#SSH_HOST IP адрес вашего сервера
+#SSH_USER Имя пользователя (например, snegzok)
+#SSH_KEY  Содержимое приватного ключа (cat ~/.ssh/id_rsa)
+#SSH_KNOWN_HOSTS  Вывод ssh-keyscan ваш-сервер
+#Получить SSH_KNOWN_HOSTS:
+#bash
+#ssh-keyscan ваш-сервер.ru
