@@ -1,6 +1,6 @@
 
 🔐 Шаг 2: Настройка GitHub Secrets
-В репозитории перейдите в Settings → Secrets and variables → Actions и добавьте:
+## В репозитории перейдите в Settings → Secrets and variables → Actions и добавьте:
 
 Secret Name	Откуда взять
 SSH_HOST	IP адрес вашего сервера
