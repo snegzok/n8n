@@ -18,7 +18,7 @@ In the manifest file : n8n-stack.yml and prometheus-stack.yaml
 Configuration Details: 
 * **n8n domain:** n8n.expert-only.ru
 * **WEBHOOK_URL:** https://your-domain.com
-* **Grafana:** grafana.expert-only.ru
+* **Grafana domain:** grafana.expert-only.ru
 
 
 Production-ready Docker Swarm стек для запуска **n8n** and **monitoring** (Prometheus + Grafana + экспортеры).
